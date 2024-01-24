@@ -20,13 +20,15 @@
 //-------------------------------------------------------------
 #define cs_set() HAL_GPIO_WritePin(GPIOA,GPIO_PIN_10,GPIO_PIN_RESET)
 #define cs_reset() HAL_GPIO_WritePin(GPIOA,GPIO_PIN_10,GPIO_PIN_SET)
+
+
 //-------------------------------------------------------------
 extern SPI_HandleTypeDef hspi1;
 extern UART_HandleTypeDef huart2;
 //-------------------------------------------------------------
 w25_info_t  w25_info;
-char str1[30];
 uint8_t buf[10];
+uint8_t rx_buf[1025];
 //-------------------------------------------------------------
 void SPI1_Send (uint8_t *dt, uint16_t cnt)
 {
@@ -411,3 +413,49 @@ void W25_Ini(void)
   w25_info.NumKB=(w25_info.SectorCount*w25_info.SectorSize)/1024;
 }
 //-------------------------------------------------------------
+void Show_Memory(int need, uint32_t start_address)
+{
+	char str1[30];
+		unsigned int addr=0;
+  uint8_t count_page;
+  switch (need)
+  {
+  case PAGE:
+    count_page = 1;
+    break;
+  case SECTOR:
+    count_page = 16;
+    break;
+  case BLOCK:
+    count_page = 256;
+    break;
+  }
+  for(uint16_t k=0; k<count_page; k++)
+    {
+      W25_Read_Page(rx_buf, start_address, 0, 256);
+      for(uint8_t i=0; i<16; i++)
+      {
+        addr = start_address*256 + i*16;
+        sprintf(str1,"%08X: ", addr);
+        HAL_UART_Transmit(&huart2,(uint8_t*)str1,10,0x1000);
+        for(uint8_t j=0; j<16; j++)
+        {
+          sprintf(str1,"%02X", rx_buf[(uint16_t)i*16 + (uint16_t)j]);
+          HAL_UART_Transmit(&huart2,(uint8_t*)str1,2,0x1000);
+          if(j==7) HAL_UART_Transmit(&huart2,(uint8_t*)"|",1,0x1000);
+          else HAL_UART_Transmit(&huart2,(uint8_t*)" ",1,0x1000);
+        }
+        HAL_UART_Transmit(&huart2,(uint8_t*)"| ",1,0x1000);
+        for(uint8_t j=0; j<16; j++)
+        {
+          if ((rx_buf[(uint16_t)i*16 + (uint16_t)j] == 0x0A) ||
+              (rx_buf[(uint16_t)i*16 + (uint16_t)j] == 0x0D)) sprintf(str1," ");
+          else sprintf(str1,"%c", (char) rx_buf[(uint16_t)i*16 + (uint16_t)j]);
+          HAL_UART_Transmit(&huart2,(uint8_t*)str1,1,0x1000);
+        }
+        HAL_UART_Transmit(&huart2,(uint8_t*)"\r\n",2,0x1000);
+      }
+      HAL_UART_Transmit(&huart2,(uint8_t*)"\r\n",2,0x1000);
+      start_address++;
+    }
+}
