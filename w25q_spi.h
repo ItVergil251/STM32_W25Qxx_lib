@@ -1,10 +1,16 @@
 #ifndef __W25Q_SPI_H
 #define __W25Q_SPI_H
 //-------------------------------------------------------------
+#include "main.h"
 #include "stm32f3xx_hal.h"
 #include "stdint.h"
 #include <stdio.h>
 #include <string.h>
+
+#define PAGE 1
+#define SECTOR 2
+#define BLOCK 3
+
 //-------------------------------------------------------------
 typedef struct
 {
@@ -37,5 +43,6 @@ void W25_Read_Data(uint32_t addr, uint8_t* data, uint32_t sz);
 void W25_Read_Page(uint8_t* data, uint32_t page_addr, uint32_t offset, uint32_t sz);
 uint32_t W25_Read_ID(void);
 void W25_Ini(void);
+void Show_Memory(uint8_t need, uint32_t start_address);
 //-------------------------------------------------------------
 #endif /* __W25Q_SPI_H */
