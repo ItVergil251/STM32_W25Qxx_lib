@@ -1,4 +1,5 @@
 #include "w25q_spi.h"
+
 //-------------------------------------------------------------
 #define    W25_WRITE_DISABLE  0x04
 #define    W25_WRITE_ENABLE 0x06
@@ -18,27 +19,25 @@
 #define    W25_WRITE_STATUS_2 0x31
 #define    W25_WRITE_STATUS_3 0x11
 //-------------------------------------------------------------
-#define cs_set() HAL_GPIO_WritePin(GPIOA,GPIO_PIN_10,GPIO_PIN_RESET)
-#define cs_reset() HAL_GPIO_WritePin(GPIOA,GPIO_PIN_10,GPIO_PIN_SET)
-
-
+// #define cs_set() HAL_GPIO_WritePin(SPI3_CS_GPIO_Port, SPI3_CS_Pin, GPIO_PIN_RESET)
+// #define cs_reset() HAL_GPIO_WritePin(SPI3_CS_GPIO_Port, SPI3_CS_Pin, GPIO_PIN_SET)
 //-------------------------------------------------------------
-extern SPI_HandleTypeDef hspi1;
-extern UART_HandleTypeDef huart2;
+// extern SPI_HandleTypeDef hspi3;
+// extern UART_HandleTypeDef huart2;
 //-------------------------------------------------------------
 w25_info_t  w25_info;
+char str1[30];
 uint8_t buf[10];
-uint8_t rx_buf[1025];
 //-------------------------------------------------------------
 void SPI1_Send (uint8_t *dt, uint16_t cnt)
 {
-  HAL_SPI_Transmit (&hspi1, dt, cnt, 5000);
+  HAL_SPI_Transmit (&hspi3, dt, cnt, 5000);
 
 }
 //-------------------------------------------------------------
 void SPI1_Recv (uint8_t *dt, uint16_t cnt)
 {
-  HAL_SPI_Receive (&hspi1, dt, cnt, 5000);
+  HAL_SPI_Receive (&hspi3, dt, cnt, 5000);
 }
 //-------------------------------------------------------------
 void W25_Reset (void)
@@ -413,11 +412,13 @@ void W25_Ini(void)
   w25_info.NumKB=(w25_info.SectorCount*w25_info.SectorSize)/1024;
 }
 //-------------------------------------------------------------
+
 void Show_Memory(int need, uint32_t start_address)
 {
 	char str1[30];
+  uint8_t rx_buf[1025];
 		unsigned int addr=0;
-  uint8_t count_page;
+  int count_page;
   switch (need)
   {
   case PAGE:
