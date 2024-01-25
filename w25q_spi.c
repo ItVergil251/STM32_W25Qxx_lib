@@ -1,6 +1,5 @@
 #include "w25q_spi.h"
-#include "stm32f4xx_hal.h"
-#include "gpio.h"
+
 //-------------------------------------------------------------
 #define    W25_WRITE_DISABLE  0x04
 #define    W25_WRITE_ENABLE 0x06
